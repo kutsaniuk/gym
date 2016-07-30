@@ -1,0 +1,11 @@
+<form name="userForm">
+    <input type="text" class="form-control" ng-model="user.username">
+    <input type="text" class="form-control" ng-model="user.password">
+    <input type="text" class="form-control" ng-model="user.email">
+    <select class="form-control" ng-model="user.role">
+        <option value="ROLE_ADMIN">Admin</option>
+        <option value="ROLE_EDITOR">Editor</option>
+    </select>
+    <button ng-if="registerUser" class="btn btn-default" ng-click="registerUser(user)" translate>register</button>
+    <button ng-if="editUser" class="btn btn-default" ng-click="updateUser(user)" translate>update</button>
+</form>

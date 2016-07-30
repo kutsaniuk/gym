@@ -6,6 +6,8 @@
             'home',
             'news',
             'contact',
+            'users',
+            'posts',
             'ui.router',
             'ui.bootstrap',
             'ngCookies',

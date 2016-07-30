@@ -1,0 +1,6 @@
+<form name="userForm">
+    <input type="text" class="form-control" ng-model="post.title">
+    <textarea class="form-control" ng-model="post.text"></textarea>
+    <button ng-if="registerUser" class="btn btn-default" ng-click="registerUser(user)" translate>register</button>
+    <button ng-if="editUser" class="btn btn-default" ng-click="updateUser(user)" translate>update</button>
+</form>

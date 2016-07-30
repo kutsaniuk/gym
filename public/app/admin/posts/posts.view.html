@@ -1,0 +1,38 @@
+<!-- Page Header -->
+<!-- Set your background image for this header on the line below. -->
+<header class="intro-header" style="background-image: url('/dist/img/home-bg.jpg'); height: 60px">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="container" ng-init="getPosts(1, 9)">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <button class="btn btn-default" ng-click="openCreatePost()" translate>addPost</button>
+            <table>
+                <tr ng-repeat="post in posts.items">
+                    <td ng-bind="post.title"></td>
+                    <td ng-bind="post.text"></td>
+                    <td>
+                        <div class="btn-group pull-right">
+                            <button class="btn btn-default" ng-click="openEditPost(post.id)"><i class="glyphicon glyphicon-pencil"></i></button>
+                            <button class="btn btn-default" ng-click="removePost(post.id)"><i class="glyphicon glyphicon-remove"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <hr>
+            <!-- Pager -->
+            <div class="row" ng-show="posts.total_items > 9 && usersLimit > 4">
+            </div>
+            <uib-pager total-items="posts.total_items" ng-model="currentPage"
+                       ng-change="getPosts(currentPage, 9)" items-per-page="9"></uib-pager>
+        </div>
+    </div>
+</div>

@@ -5,7 +5,7 @@
         .module('main')
         .controller('UsersCtrl', UsersCtrl);
 
-    function UsersCtrl($scope, UsersService, AuthService, ngDialog) {
+    function UsersCtrl($scope, $state, crAcl, UsersService, AuthService, CredentialsService, ngDialog) {
         var sc = $scope;
 
         sc.getUsers = function (page, limit) {
@@ -78,7 +78,7 @@
 
         sc.openRegisterUser = function () {
             sc.user = null;
-            sc.registerUser = true;
+            sc.addUser = true;
             sc.editUser = false;
 
             ngDialog.open({
@@ -92,7 +92,7 @@
         sc.openEditUser = function (id) {
             sc.getUserById(id);
             sc.editUser = true;
-            sc.registerUser = false;
+            sc.addUser = false;
 
             ngDialog.open({
                 template: 'app/admin/users/new/users.new.view.html',
@@ -127,6 +127,12 @@
             }
 
             UsersService.update(user).then(success, failed);
+        };
+
+        sc.logout = function () {
+            CredentialsService.ClearCredentials();
+            crAcl.setRole("ROLE_GUEST");
+            $state.go('main.home');
         }
 
     }

@@ -17,9 +17,11 @@
             'base64',
             'naif.base64',
             'pascalprecht.translate',
-            'cr.acl'
+            'cr.acl',
+            'textAngular'
         ])
-        .config(configure);
+        .config(configure)
+        .run(run);
 
     configure.$inject = ['$stateProvider', '$urlRouterProvider', '$translateProvider'];
     function configure($stateProvider, $urlRouterProvider, $translateProvider) {
@@ -33,8 +35,35 @@
             .state('main', {
                 url: '/',
                 abstract: true,
+                controller: 'UsersCtrl',
                 templateUrl: 'app/main.view.html'
+            })
+            .state('login', {
+                url: '/login',
+                controller: 'AuthCtrl',
+                templateUrl: 'app/auth/auth.view.html'
             });
+
+    }
+
+    run.$inject = ['$rootScope', '$cookieStore', '$state', '$translate', '$http', 'UsersService', 'crAcl'];
+    function run($rootScope, $cookieStore, $state, $translate, $http, UsersService, crAcl) {
+        // keep user logged in after page refresh
+        $rootScope.globals = $cookieStore.get('globals') || {};
+
+        crAcl.setInheritanceRoles({
+            "ROLE_ADMIN": ["ROLE_ADMIN"],
+            "ROLE_EDITOR": ["ROLE_EDITOR"],
+            "ROLE_GUEST": ["ROLE_GUEST"]
+        });
+
+        crAcl.setRedirect('main.home');
+
+        if ($rootScope.globals.currentUser) {
+            $http.defaults.headers.common['Authorization'] = 'Basic ' + $rootScope.globals.currentUser.authdata.id;
+            crAcl.setRole($rootScope.globals.currentUser.role);
+        }
+        else crAcl.setRole("ROLE_GUEST");
 
     }
 
@@ -47,7 +76,7 @@
         .module('main')
         .controller('AuthCtrl', AuthCtrl);
 
-    function AuthCtrl($scope, $state, AuthService, crAcl, $translate, CredentialsService, EventService) {
+    function AuthCtrl($scope, $state, AuthService, crAcl, $translate, CredentialsService) {
         var sc = $scope;
 
         CredentialsService.ClearCredentials();
@@ -63,18 +92,18 @@
         sc.usernameCheckShow = false;
         $translate.use(sc.lang);
 
-        sc.login = function (username, password) {
-            AuthService.login(username, password)
+        sc.login = function (user) {
+            AuthService.login(user.username, user.password)
                 .then(function successCallback(response) {
-                    CredentialsService.SetCredentials(response.data.id, sc.username, sc.password, response.data.role);
+                    CredentialsService.SetCredentials(response.data.id, user.username, user.password, response.data.role);
                     crAcl.setRole(response.data.role);
 
                     switch (crAcl.getRole()) {
-                        case 'ROLE_USER':
-                            $state.go('main.user.feed');  
+                        case 'ROLE_EDITOR':
+                            $state.go('main.posts');
                             break;
                         case 'ROLE_ADMIN':
-                            $state.go('main.user.dashboard'); 
+                            $state.go('main.users');
                             break;
                     }
 
@@ -82,22 +111,6 @@
                 }, function errorCallback(response) {
                     sc.authFailed = true;
                 });
-        };
-
-        sc.register = function () {
-            sc.user.created = new Date().toISOString();
-            sc.user.language = sc.lang;
-            if (sc.user.email != '' &&
-                sc.user.name != '' &&
-                sc.user.username != '' &&
-                sc.user.password != '' &&
-                sc.registerForm.$valid && sc.usernameCheked) AuthService.register(sc.user)
-                .then(function successCallback(response) {
-                    sc.login(sc.user.username, sc.user.password);
-                }, function errorCallback(response) {
-                    alert('failed');
-                });
-            else sc.emtryField = true;
         };
         
         sc.checkUsername = function (username) {
@@ -108,19 +121,6 @@
                 }, function errorCallback(response) {
                     sc.usernameCheked = false;
                 });
-        };
-
-        sc.getPageEvents = function (page, limit, type, name) {
-
-            var getPageSuccess = function (response) {
-                sc.events = response.data;
-            };
-
-            var getPageFailed = function (response) {
-                alert(response.status);
-            };
-
-            EventService.getPage(page, limit, type, name).then(getPageSuccess, getPageFailed);
         };
 
         sc.setLang = function (lang) {
@@ -336,6 +336,7 @@
         $stateProvider
             .state('main.news', {
                 url: 'news',
+                controller: 'PostsCtrl',
                 templateUrl: 'app/news/news.view.html'
             });
 
@@ -348,9 +349,201 @@
 
     angular
         .module('main')
+        .controller('PostCtrl', PostCtrl);
+
+    function PostCtrl($scope, PostsService, $stateParams) {
+        var sc = $scope;
+        
+        sc.postId = $stateParams.id;
+
+        sc.getPostById = function (id) { 
+
+            function success(response) {
+                sc.post = response.data;
+            }
+
+            function failed(response) {
+                sc.post = response.data;
+                console.log(response.status);
+            }
+
+            PostsService.getById(id).then(success, failed);
+        };
+
+        sc.getPostById(sc.postId);
+
+    }
+})();
+
+(function () {
+    'use strict';
+
+    angular
+        .module('main')
+        .controller('PostsCtrl', PostsCtrl);
+
+    function PostsCtrl($scope, $state, PostsService, $location, ngDialog) {
+        var sc = $scope;
+
+        sc.getPosts = function (page, limit) {
+
+            function success(response) {
+                sc.posts = response.data;
+            }
+
+            function failed(response) {
+                sc.posts = response.data;
+                console.log(response.status);
+            }
+
+            PostsService.getPage(page, limit).then(success, failed);
+        };
+
+        sc.getPostById = function (id) {
+
+            function success(response) {
+                sc.post = response.data;
+            }
+
+            function failed(response) {
+                sc.post = response.data;
+                console.log(response.status);
+            }
+
+            PostsService.getById(id).then(success, failed);
+        };
+
+        sc.openCreatePost = function () {
+            $state.go('main.newPost');
+        };
+
+        sc.openEditPost = function (id) {
+            $location.path('post/edit/' + id);
+        };
+
+        sc.removePost = function (id) {
+            function success(response) {
+                sc.getPosts(1, 9);
+            }
+
+            function failed(response) {
+                sc.posts = response.data;
+                console.log(response.status);
+            }
+
+            PostsService.remove(id).then(success, failed);
+        };
+
+        
+        
+        sc.updatePost = function (post) {
+            function success(response) {
+                console.log(response.status);
+            }
+        
+            function failed(response) {
+                console.log(response.status);
+            }
+        
+            PostsService.update(post).then(success, failed);
+        }
+
+    }
+})();
+
+(function () {
+    'use strict';
+
+    angular
+        .module('posts', [
+            'ui.router'
+        ])
+        .config(configure);
+
+    configure.$inject = ['$stateProvider', '$urlRouterProvider'];
+    function configure($stateProvider, $urlRouterProvider) {
+
+        $stateProvider
+            .state('main.posts', {
+                url: 'posts',
+                controller: 'PostsCtrl',
+                templateUrl: 'app/admin/posts/posts.view.html',
+                data: {
+                    is_granted: ["ROLE_EDITOR"]
+                }
+            })
+            .state('main.newPost', {
+                url: 'post/new',
+                controller: 'PostsNewCtrl',
+                templateUrl: 'app/admin/posts/new/posts.new.view.html',
+                data: {
+                    is_granted: ["ROLE_EDITOR"]
+                }
+            })
+            .state('main.editPost', {
+                url: 'post/edit/:id',
+                controller: 'PostsEditCtrl',
+                templateUrl: 'app/admin/posts/new/posts.new.view.html',
+                data: {
+                    is_granted: ["ROLE_EDITOR"]
+                }
+            })
+            .state('main.post', {
+                url: 'post/:id',
+                controller: 'PostCtrl',
+                templateUrl: 'app/post/post.view.html',
+                data: {
+                    is_granted: ["ROLE_EDITOR"]
+                }
+            });
+    }
+
+})();
+
+(function () {
+    'use strict';
+
+    angular
+        .module('main')
+        .service('PostsService', function ($http) {
+
+            var urlBase = '/news';
+
+            this.getPage = function (page, limit) {
+                return $http.get(urlBase, {
+                    params: {
+                        page: page,
+                        limit: limit
+                    }
+                });
+            };
+
+            this.getById = function (id) {
+                return $http.get(urlBase + '/post/' + id);
+            };
+
+            this.update = function (post) {
+                return $http.post(urlBase + '/update', post);
+            };
+
+            this.remove = function (post) {
+                return $http.post(urlBase + '/remove', post);
+            };
+            
+            this.create = function (post) {
+                return $http.post(urlBase + '/create', post);
+            };
+
+        });
+})();
+(function () {
+    'use strict';
+
+    angular
+        .module('main')
         .controller('UsersCtrl', UsersCtrl);
 
-    function UsersCtrl($scope, UsersService, AuthService, ngDialog) {
+    function UsersCtrl($scope, $state, crAcl, UsersService, AuthService, CredentialsService, ngDialog) {
         var sc = $scope;
 
         sc.getUsers = function (page, limit) {
@@ -423,7 +616,7 @@
 
         sc.openRegisterUser = function () {
             sc.user = null;
-            sc.registerUser = true;
+            sc.addUser = true;
             sc.editUser = false;
 
             ngDialog.open({
@@ -437,7 +630,7 @@
         sc.openEditUser = function (id) {
             sc.getUserById(id);
             sc.editUser = true;
-            sc.registerUser = false;
+            sc.addUser = false;
 
             ngDialog.open({
                 template: 'app/admin/users/new/users.new.view.html',
@@ -472,6 +665,12 @@
             }
 
             UsersService.update(user).then(success, failed);
+        };
+
+        sc.logout = function () {
+            CredentialsService.ClearCredentials();
+            crAcl.setRole("ROLE_GUEST");
+            $state.go('main.home');
         }
 
     }
@@ -493,9 +692,12 @@
             .state('main.users', {
                 url: 'users',
                 controller: 'UsersCtrl',
-                templateUrl: 'app/admin/users/users.view.html'
+                templateUrl: 'app/admin/users/users.view.html',
+                data: {
+                    is_granted: ["ROLE_ADMIN"]
+                }
             });
-
+ 
     }
 
 })();
@@ -541,24 +743,67 @@
 
     angular
         .module('main')
-        .controller('PostsCtrl', PostsCtrl);
+        .controller('PostsEditCtrl', PostsEditCtrl);
 
-    function PostsCtrl($scope, PostsService, AuthService, ngDialog) {
+    function PostsEditCtrl($scope, $stateParams, PostsService, AuthService, ngDialog) {
         var sc = $scope;
+        sc.editPost = true;
 
-        sc.getPosts = function (page, limit) {
+        sc.toolbar = [
+            ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
+            ['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear'],
+            ['justifyLeft', 'justifyCenter', 'justifyRight'],
+            ['html', 'insertImage','insertLink', 'insertVideo']
+        ];
+
+        sc.getPostById = function (id) {
 
             function success(response) {
-                sc.posts = response.data;
+                sc.post = response.data;
             }
 
             function failed(response) {
-                sc.posts = response.data;
+                sc.post = response.data;
                 console.log(response.status);
             }
 
-            PostsService.getPage(page, limit).then(success, failed);
+            PostsService.getById(id).then(success, failed);
         };
+        
+        sc.updatePost = function (post) {
+            function success(response) {
+                console.log(response.status);
+            }
+        
+            function failed(response) {
+                console.log(response.status);
+            }
+        
+            PostsService.update(post).then(success, failed);
+        };
+
+        sc.getPostById($stateParams.id);
+
+    }
+})();
+
+(function () {
+    'use strict';
+
+    angular
+        .module('main')
+        .controller('PostsNewCtrl', PostsNewCtrl);
+
+    function PostsNewCtrl($scope, $state, PostsService, AuthService, ngDialog) {
+        var sc = $scope;
+        sc.addPost = true;
+
+        sc.toolbar = [
+            ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
+            ['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear'],
+            ['justifyLeft', 'justifyCenter', 'justifyRight'],
+            ['html', 'insertImage','insertLink', 'insertVideo']
+        ];
 
         sc.getPostById = function (id) {
 
@@ -574,127 +819,32 @@
             PostsService.getById(id).then(success, failed);
         };
 
-        sc.openCreatePost = function () {
-            sc.post = null;
-            sc.createPost = true;
-            sc.editPost = false;
-
-            ngDialog.open({
-                template: 'app/admin/posts/new/posts.new.view.html',
-                className: 'ngdialog-theme-default',
-                showClose: true,
-                scope: $scope
-            });
-        };
-
-        sc.openEditPost = function (id) {
-            sc.getPostById(id);
-            sc.editPost = true;
-            sc.createPost = false;
-
-            ngDialog.open({
-                template: 'app/admin/posts/new/posts.new.view.html',
-                className: 'ngdialog-theme-default',
-                showClose: true,
-                scope: $scope
-            });
-        };
-
-        sc.removePost = function (id) {
+        sc.createPost = function (post) {
             function success(response) {
-                sc.getPosts(1, 9);
+                console.log(response.status);
             }
-
+        
             function failed(response) {
-                sc.posts = response.data;
                 console.log(response.status);
             }
 
-            PostsService.remove(id).then(success, failed);
+            post.created = new Date().toISOString();
+            post.users_id = 1; // CURRENT USER !!! 
+
+            PostsService.create(post).then(success, failed);
         };
-
-        // sc.registerUser = function (user) {
-        //     function success(response) {
-        //         console.log(response.status);
-        //     }
-        //
-        //     function failed(response) {
-        //         console.log(response.status);
-        //     }
-        //
-        //     user.created = new Date().toISOString();
-        //     user.language = 'uk';
-        //
-        //     AuthService.register(user).then(success, failed);
-        // };
-        //
-        // sc.updateUser = function (user) {
-        //     function success(response) {
-        //         console.log(response.status);
-        //     }
-        //
-        //     function failed(response) {
-        //         console.log(response.status);
-        //     }
-        //
-        //     UsersService.update(user).then(success, failed);
-        // }
-
-    }
-})();
-
-(function () {
-    'use strict';
-
-    angular
-        .module('posts', [
-            'ui.router'
-        ])
-        .config(configure);
-
-    configure.$inject = ['$stateProvider', '$urlRouterProvider'];
-    function configure($stateProvider, $urlRouterProvider) {
         
-        $stateProvider
-            .state('main.posts', {
-                url: 'posts',
-                controller: 'PostsCtrl',
-                templateUrl: 'app/admin/posts/posts.view.html'
-            });
+        sc.updatePost = function (post) {
+            function success(response) {
+                console.log(response.status);
+            }
+        
+            function failed(response) {
+                console.log(response.status);
+            }
+        
+            PostsService.update(post).then(success, failed);
+        }
 
     }
-
-})();
-
-(function () {
-    'use strict';
-
-    angular
-        .module('main')
-        .service('PostsService', function ($http) {
-
-            var urlBase = '/news';
-
-            this.getPage = function (page, limit) {
-                return $http.get(urlBase, {
-                    params: {
-                        page: page,
-                        limit: limit
-                    }
-                });
-            };
-
-            this.getById = function (id) {
-                return $http.get(urlBase + '/post/' + id);
-            };
-
-            this.update = function (post) {
-                return $http.post(urlBase + '/update', post);
-            };
-
-            this.remove = function (post) {
-                return $http.post(urlBase + '/remove', post);
-            };
-
-        });
 })();

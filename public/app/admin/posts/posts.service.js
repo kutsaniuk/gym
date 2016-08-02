@@ -27,6 +27,10 @@
             this.remove = function (post) {
                 return $http.post(urlBase + '/remove', post);
             };
+            
+            this.create = function (post) {
+                return $http.post(urlBase + '/create', post);
+            };
 
         });
 })();

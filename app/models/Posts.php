@@ -10,7 +10,9 @@ class Posts extends Model
     
     public $title;
 
-    public $text;
+    public $subheading;
+
+    public $article;
 
     public $created;
 

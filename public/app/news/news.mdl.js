@@ -13,6 +13,7 @@
         $stateProvider
             .state('main.news', {
                 url: 'news',
+                controller: 'PostsCtrl',
                 templateUrl: 'app/news/news.view.html'
             });
 

@@ -61,4 +61,51 @@ class NewsController extends Controller
         return $response;
     }
 
+    public function updateAction()
+    {
+        $_post = $this->request->getJsonRawBody();
+
+        $post = Posts::findFirst($_post->id);
+        $post->update(
+            array(
+                'title' => $_post->title,
+                'subheading' => $_post->subheading,
+                'article' => $_post->article,
+                'created' => $_post->created,
+                'users_id' => $_post->users_id
+            )
+        );
+
+        $response = new Response();
+
+        if ($post->update()) {
+            $response->setStatusCode(200);
+        } else $response->setStatusCode(409);
+
+        return $response;
+    }
+
+    public function createAction()
+    {
+        $_post = $this->request->getJsonRawBody();
+
+        $post = new Posts();
+        $post->assign(
+            array(
+                'title' => $_post->title,
+                'subheading' => $_post->subheading,
+                'article' => $_post->article,
+                'created' => $_post->created,
+                'users_id' => $_post->users_id
+            )
+        );
+
+        $response = new Response();
+
+        if ($post->save()) $response->setStatusCode(200);
+        else $response->setStatusCode(409);
+
+        return $response;
+    }
+
 }

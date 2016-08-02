@@ -3,24 +3,18 @@
 
     angular
         .module('main')
-        .controller('PostsCtrl', PostsCtrl);
+        .controller('PostsNewCtrl', PostsNewCtrl);
 
-    function PostsCtrl($scope, $state, PostsService, $location, ngDialog) {
+    function PostsNewCtrl($scope, $state, PostsService, AuthService, ngDialog) {
         var sc = $scope;
+        sc.addPost = true;
 
-        sc.getPosts = function (page, limit) {
-
-            function success(response) {
-                sc.posts = response.data;
-            }
-
-            function failed(response) {
-                sc.posts = response.data;
-                console.log(response.status);
-            }
-
-            PostsService.getPage(page, limit).then(success, failed);
-        };
+        sc.toolbar = [
+            ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'pre', 'quote'],
+            ['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear'],
+            ['justifyLeft', 'justifyCenter', 'justifyRight'],
+            ['html', 'insertImage','insertLink', 'insertVideo']
+        ];
 
         sc.getPostById = function (id) {
 
@@ -36,28 +30,20 @@
             PostsService.getById(id).then(success, failed);
         };
 
-        sc.openCreatePost = function () {
-            $state.go('main.newPost');
-        };
-
-        sc.openEditPost = function (id) {
-            $location.path('post/edit/' + id);
-        };
-
-        sc.removePost = function (id) {
+        sc.createPost = function (post) {
             function success(response) {
-                sc.getPosts(1, 9);
+                console.log(response.status);
             }
-
+        
             function failed(response) {
-                sc.posts = response.data;
                 console.log(response.status);
             }
 
-            PostsService.remove(id).then(success, failed);
-        };
+            post.created = new Date().toISOString();
+            post.users_id = 1; // CURRENT USER !!! 
 
-        
+            PostsService.create(post).then(success, failed);
+        };
         
         sc.updatePost = function (post) {
             function success(response) {

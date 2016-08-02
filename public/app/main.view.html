@@ -14,10 +14,10 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav navbar-right">
-                <li>
+                <li cr-granted="ROLE_ADMIN">
                     <a href="#/users">Users</a>
                 </li>
-                <li>
+                <li cr-granted="ROLE_EDITOR">
                     <a href="#/posts">Posts</a>
                 </li>
                 <li>
@@ -28,6 +28,12 @@
                 </li>
                 <li>
                     <a href="#/contact">Contact</a>
+                </li>
+                <li cr-granted="ROLE_ADMIN, ROLE_EDITOR">
+                    <img src="/dist/img/user.profile.avatar.default.svg" style="border-radius: 100%; width: 30px; margin-top: 15px; margin-left: 15px">
+                </li>
+                <li cr-granted="ROLE_ADMIN, ROLE_EDITOR">
+                    <a href="" ng-click="logout()">Logout</a>
                 </li>
             </ul>
         </div>
@@ -71,7 +77,9 @@
                         </a>
                     </li>
                 </ul>
-                <p class="copyright text-muted">Copyright &copy; GYM 2016</p>
+                <p class="copyright text-muted">Copyright &copy; GYM 2016
+                    <br><center><a href="#/login">Sing in</a></center>
+                </p>
             </div>
         </div>
     </div>

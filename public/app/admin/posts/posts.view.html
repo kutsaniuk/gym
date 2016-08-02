@@ -11,14 +11,16 @@
 </header>
 
 <!-- Main Content -->
-<div class="container" ng-init="getPosts(1, 9)">
+<div class="container" ng-init="getPosts(1, 5)">
     <div class="row">
         <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
             <button class="btn btn-default" ng-click="openCreatePost()" translate>addPost</button>
-            <table>
+            <table class="table">
                 <tr ng-repeat="post in posts.items">
-                    <td ng-bind="post.title"></td>
-                    <td ng-bind="post.text"></td>
+                    <td>
+                        <a href="#/post/{{post.id}}"><div ng-bind="post.title"></div></a>
+                        <div ng-bind="post.subheading"></div>
+                    </td>
                     <td>
                         <div class="btn-group pull-right">
                             <button class="btn btn-default" ng-click="openEditPost(post.id)"><i class="glyphicon glyphicon-pencil"></i></button>
@@ -32,7 +34,7 @@
             <div class="row" ng-show="posts.total_items > 9 && usersLimit > 4">
             </div>
             <uib-pager total-items="posts.total_items" ng-model="currentPage"
-                       ng-change="getPosts(currentPage, 9)" items-per-page="9"></uib-pager>
+                       ng-change="getPosts(currentPage, 5)" items-per-page="5"></uib-pager>
         </div>
     </div>
 </div>

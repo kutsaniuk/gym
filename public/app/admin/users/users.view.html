@@ -14,8 +14,10 @@
 <div class="container" ng-init="getUsers(1, 9)">
     <div class="row">
         <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-            <button class="btn btn-default" ng-click="openRegisterUser()" translate>addUser</button>
-            <table>
+            Total users {{users.total_items}}
+            <button class="btn btn-default" ng-click="openRegisterUser()" style="float: right" translate>addUser</button>
+            <br><br><br>
+            <table class="table">
                 <tr ng-repeat="user in users.items">
                     <td><img src="" alt=""></td>
                     <td ng-bind="user.username"></td>

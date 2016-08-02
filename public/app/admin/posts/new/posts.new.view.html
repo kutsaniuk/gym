@@ -1,6 +1,41 @@
-<form name="userForm">
-    <input type="text" class="form-control" ng-model="post.title">
-    <textarea class="form-control" ng-model="post.text"></textarea>
-    <button ng-if="registerUser" class="btn btn-default" ng-click="registerUser(user)" translate>register</button>
-    <button ng-if="editUser" class="btn btn-default" ng-click="updateUser(user)" translate>update</button>
-</form>
+<!-- Page Header -->
+<!-- Set your background image for this header on the line below. -->
+<header class="intro-header" style="background-image: url('/dist/img/home-bg.jpg'); height: 60px">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="container" ng-init="getPosts(1, 9)">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <form name="userForm">
+                <div class="row control-group">
+                    <div class="form-group col-xs-12 floating-label-form-group controls">
+                        <label>Title</label>
+                        <input type="text" class="form-control" placeholder="Title" ng-model="post.title">
+                        <p class="help-block text-danger"></p>
+                    </div>
+                </div>
+                <div class="row control-group">
+                    <div class="form-group col-xs-12 floating-label-form-group controls">
+                        <label>Subheading</label>
+                        <input type="text" class="form-control" placeholder="Subheading" ng-model="post.subheading">
+                        <p class="help-block text-danger"></p>
+                    </div>
+                </div>
+                <div text-angular ta-text-editor-class="form-content" ta-toolbar-class="btn-toolbar"
+                     ta-toolbar-group-class="btn-group" ta-toolbar-button-class="btn btn-default"
+                     ta-toolbar-active-button-class="active" ng-model="post.article" ta-toolbar="toolbar"
+                     ta-focussed-class="focussed"></div>
+                <button ng-if="addPost" class="btn btn-default" ng-click="createPost(post)" translate>create</button>
+                <button ng-if="editPost" class="btn btn-default" ng-click="updatePost(post)" translate>update</button>
+            </form>
+        </div>
+    </div>
+</div>

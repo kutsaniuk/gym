@@ -12,7 +12,9 @@ class NewsController extends Controller
         $currentPage = (int)$_GET["page"];
         $limit = (int)$_GET["limit"];
 
-        $posts = Posts::find();
+        $posts = Posts::find(array(
+            "order" => "created DESC"
+        ));
         $paginator = new PaginatorModel(
             array(
                 "data" => $posts,
@@ -90,12 +92,14 @@ class NewsController extends Controller
         $_post = $this->request->getJsonRawBody();
 
         $post = new Posts();
-        $post->assign(
+        $post->assign( 
             array(
                 'title' => $_post->title,
                 'subheading' => $_post->subheading,
                 'article' => $_post->article,
                 'created' => $_post->created,
+                'image' => $_post->image,
+                'filetype' => $_post->filetype,
                 'users_id' => $_post->users_id
             )
         );
@@ -106,6 +110,17 @@ class NewsController extends Controller
         else $response->setStatusCode(409);
 
         return $response;
+    }
+
+    public function imageAction($id)
+    {
+        $post = Posts::findFirst($id);
+
+        header('Content-Type: ' . $post->filetype);
+        $response = new Response();
+        if ($post->image != null)
+            echo base64_decode($post->image);
+        else return $response->setStatusCode(404);
     }
 
 }

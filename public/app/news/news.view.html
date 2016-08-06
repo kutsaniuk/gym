@@ -29,6 +29,8 @@
                 <hr>
             </div>
             <!-- Pager -->
+            <uib-pager total-items="posts.total_items" ng-model="currentPage"
+                       ng-change="getPosts(currentPage, 5)" items-per-page="5"></uib-pager>
             <ul class="pager">
                 <li class="next">
                     <a href="#">Older Posts &rarr;</a>

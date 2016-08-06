@@ -4,21 +4,15 @@ use Phalcon\Mvc\Model;
 use Phalcon\Mvc\Model\Validator\Email as EmailValidator;
 use Phalcon\Mvc\Model\Validator\Uniqueness as UniquenessValidator;
 
-class Posts extends Model
+class Image extends Model
 {
     public $id;
     
-    public $title;
+    public $base64;
 
-    public $subheading;
+    public $filename;
 
-    public $article;
-
-    public $created;
-    
-    public $image;
+    public $filesize;
 
     public $filetype;
-    
-    public $users_id;
 }

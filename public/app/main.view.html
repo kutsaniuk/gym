@@ -29,10 +29,16 @@
                 <li>
                     <a href="#/contact">Contact</a>
                 </li>
-                <li cr-granted="ROLE_ADMIN, ROLE_EDITOR">
+                <li cr-granted="ROLE_ADMIN">
                     <img src="/dist/img/user.profile.avatar.default.svg" style="border-radius: 100%; width: 30px; margin-top: 15px; margin-left: 15px">
                 </li>
-                <li cr-granted="ROLE_ADMIN, ROLE_EDITOR">
+                <li cr-granted="ROLE_ADMIN">
+                    <a href="" ng-click="logout()">Logout</a>
+                </li>
+                <li cr-granted="ROLE_EDITOR">
+                    <img src="/dist/img/user.profile.avatar.default.svg" style="border-radius: 100%; width: 30px; margin-top: 15px; margin-left: 15px">
+                </li>
+                <li cr-granted="ROLE_EDITOR">
                     <a href="" ng-click="logout()">Logout</a>
                 </li>
             </ul>

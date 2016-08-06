@@ -1,13 +1,13 @@
 <!-- Page Header -->
 <!-- Set your background image for this header on the line below. -->
-<header class="intro-header" style="background-image: url('/dist/img/post-bg.jpg')">
+<header class="intro-header" style="background-image: url('/news/image/{{post.id}}')">
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                 <div class="post-heading">
                     <h1 ng-bind="post.title"></h1>
                     <h2 ng-bind="post.subheading" class="subheading"></h2>
-                    <span class="meta">Posted by <a href="#">Start Bootstrap</a> {{post.created}}</span>
+                    <span class="meta">Posted {{post.created}}</span>
                 </div>
             </div>
         </div>

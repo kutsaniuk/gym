@@ -5,7 +5,7 @@
         .module('main')
         .controller('PostsEditCtrl', PostsEditCtrl);
 
-    function PostsEditCtrl($scope, $stateParams, PostsService, AuthService, ngDialog) {
+    function PostsEditCtrl($scope, $stateParams, PostsService, $location, ngDialog) {
         var sc = $scope;
         sc.editPost = true;
 
@@ -33,6 +33,7 @@
         sc.updatePost = function (post) {
             function success(response) {
                 console.log(response.status);
+                $location.path('post/' + $stateParams.id);
             }
         
             function failed(response) {

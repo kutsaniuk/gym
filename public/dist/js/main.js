@@ -745,7 +745,7 @@
         .module('main')
         .controller('PostsEditCtrl', PostsEditCtrl);
 
-    function PostsEditCtrl($scope, $stateParams, PostsService, AuthService, ngDialog) {
+    function PostsEditCtrl($scope, $stateParams, PostsService, $location, ngDialog) {
         var sc = $scope;
         sc.editPost = true;
 
@@ -773,6 +773,7 @@
         sc.updatePost = function (post) {
             function success(response) {
                 console.log(response.status);
+                $location.path('post/' + $stateParams.id);
             }
         
             function failed(response) {
@@ -794,7 +795,7 @@
         .module('main')
         .controller('PostsNewCtrl', PostsNewCtrl);
 
-    function PostsNewCtrl($scope, $state, PostsService, AuthService, ngDialog) {
+    function PostsNewCtrl($scope, $state, PostsService, $rootScope, ngDialog) {
         var sc = $scope;
         sc.addPost = true;
 
@@ -805,23 +806,10 @@
             ['html', 'insertImage','insertLink', 'insertVideo']
         ];
 
-        sc.getPostById = function (id) {
-
-            function success(response) {
-                sc.post = response.data;
-            }
-
-            function failed(response) {
-                sc.post = response.data;
-                console.log(response.status);
-            }
-
-            PostsService.getById(id).then(success, failed);
-        };
-
         sc.createPost = function (post) {
             function success(response) {
                 console.log(response.status);
+                $state.go('main.posts');
             }
         
             function failed(response) {
@@ -829,21 +817,11 @@
             }
 
             post.created = new Date().toISOString();
-            post.users_id = 1; // CURRENT USER !!! 
+            post.users_id = $rootScope.globals.currentUser.id;
+            post.image = sc.image.base64;
+            post.filetype = sc.image.filetype; 
 
             PostsService.create(post).then(success, failed);
-        };
-        
-        sc.updatePost = function (post) {
-            function success(response) {
-                console.log(response.status);
-            }
-        
-            function failed(response) {
-                console.log(response.status);
-            }
-        
-            PostsService.update(post).then(success, failed);
         }
 
     }

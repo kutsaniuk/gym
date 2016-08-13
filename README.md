@@ -1,4 +1,4 @@
-<h1>GYM<h1>
+<h1>GYM</h1>
 <p>To run this application on your machine, you need at least:</p>
 <ul>
 	<li>PHP &gt;= 5.4</li>
